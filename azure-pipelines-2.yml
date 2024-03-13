@@ -1,0 +1,43 @@
+# Node.js
+# Build a general Node.js project with npm.
+# Add steps that analyze code, save build artifacts, deploy, and more:
+# https://docs.microsoft.com/azure/devops/pipelines/languages/javascript
+
+trigger:
+  - ⁠master
+
+pool:
+  vmImage: ubuntu-latest
+variables:
+  publishDir: 'publish'
+
+steps:
+- task: NodeTool@0
+  inputs:
+    versionSpec: '10.x'
+  displayName: 'Install Node.js'
+
+- script: |
+    npm install
+  displayName: 'npm install - node_modules ekleniyor'
+
+# Belirli dosyaları publish dizinine kopyala
+- script: |
+    mkdir -p           $(publishDir)
+    cp package.json    $(publishDir)/
+    cp server.js       $(publishDir)/ 
+    cp -r models       $(publishDir)/
+    cp -r routes       $(publishDir)/
+    cp -r services     $(publishDir)/
+    cp -r templates    $(publishDir)/
+    cp -r uploads      $(publishDir)/
+    cp -r validations  $(publishDir)/
+    cp -r middleware   $(publishDir)/
+    cp -r node_modules $(publishDir)/
+  displayName: 'Copy specific files to publish folder'
+
+- task: PublishBuildArtifacts@1
+  inputs:
+    PathtoPublish: '$(publishDir)'
+    ArtifactName: 'publish'
+    publishLocation: 'Container'
